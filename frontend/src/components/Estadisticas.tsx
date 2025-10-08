@@ -163,6 +163,37 @@ const Estadisticas: React.FC = () => {
 
       {!loading && !error && estadisticas && (
         <>
+          {/* Alertas de capacidad */}
+          {estadisticas.porcentajeOcupacion >= 90 && (
+            <div className="alert alert-danger">
+              <div className="alert-icon">🚨</div>
+              <div className="alert-content">
+                <h4>¡Capacidad Crítica!</h4>
+                <p>El parqueadero está al {estadisticas.porcentajeOcupacion}% de su capacidad. Solo quedan {estadisticas.espaciosDisponibles} espacios disponibles.</p>
+              </div>
+            </div>
+          )}
+          
+          {estadisticas.porcentajeOcupacion >= 80 && estadisticas.porcentajeOcupacion < 90 && (
+            <div className="alert alert-warning">
+              <div className="alert-icon">⚠️</div>
+              <div className="alert-content">
+                <h4>Capacidad Alta</h4>
+                <p>El parqueadero está al {estadisticas.porcentajeOcupacion}% de su capacidad. Quedan {estadisticas.espaciosDisponibles} espacios disponibles.</p>
+              </div>
+            </div>
+          )}
+
+          {estadisticas.porcentajeOcupacion >= 70 && estadisticas.porcentajeOcupacion < 80 && (
+            <div className="alert alert-info">
+              <div className="alert-icon">ℹ️</div>
+              <div className="alert-content">
+                <h4>Capacidad Moderada</h4>
+                <p>El parqueadero está al {estadisticas.porcentajeOcupacion}% de su capacidad. Quedan {estadisticas.espaciosDisponibles} espacios disponibles.</p>
+              </div>
+            </div>
+          )}
+
           {/* Tarjetas de estadísticas principales */}
           <div className="stats-grid">
             <div className="stat-card total">

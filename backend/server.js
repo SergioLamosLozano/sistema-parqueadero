@@ -91,6 +91,15 @@ app.post('/api/vehiculos', async (req, res) => {
             });
         }
 
+        // Validamos el formato de la placa (3 letras + 3 números)
+        const formatoPlaca = /^[A-Za-z]{3}[0-9]{3}$/;
+        if (!formatoPlaca.test(placa)) {
+            return res.status(400).json({
+                success: false,
+                message: 'El formato de la placa debe ser 3 letras seguidas de 3 números (ejemplo: ABC123)'
+            });
+        }
+
         // Obtenemos todos los vehículos para validaciones
         const vehiculos = await database.getAllVehiculos();
         
@@ -248,6 +257,55 @@ app.delete('/api/vehiculos/:id', async (req, res) => {
             success: true,
             message: 'Vehículo eliminado exitosamente',
             data: vehiculo
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
+        });
+    }
+});
+
+// GET - Obtener historial de un vehículo específico por placa
+// Esta ruta permite obtener todo el historial de entradas y salidas de un vehículo
+app.get('/api/vehiculos/historial/:placa', async (req, res) => {
+    try {
+        const placa = req.params.placa.toUpperCase();
+        
+        // Obtenemos todos los registros del vehículo con esa placa
+        const historial = await database.getHistorialVehiculo(placa);
+        
+        if (!historial || historial.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'No se encontró historial para la placa especificada'
+            });
+        }
+        
+        // Calculamos estadísticas del historial
+        const totalVisitas = historial.length;
+        const visitasCompletas = historial.filter(v => v.fechaSalida !== null).length;
+        const tiempoPromedio = visitasCompletas > 0 ? 
+            historial
+                .filter(v => v.fechaSalida !== null)
+                .reduce((acc, v) => {
+                    const entrada = new Date(v.fechaIngreso);
+                    const salida = new Date(v.fechaSalida);
+                    return acc + (salida - entrada);
+                }, 0) / visitasCompletas / (1000 * 60 * 60) // Convertir a horas
+            : 0;
+        
+        res.status(200).json({
+            success: true,
+            message: 'Historial obtenido exitosamente',
+            data: {
+                placa: placa,
+                totalVisitas: totalVisitas,
+                visitasCompletas: visitasCompletas,
+                tiempoPromedioHoras: Math.round(tiempoPromedio * 100) / 100,
+                historial: historial
+            }
         });
     } catch (error) {
         res.status(500).json({

@@ -256,6 +256,25 @@ class Database {
         });
     }
 
+    // Obtener historial de un vehículo por placa
+    getHistorialVehiculo(placa) {
+        return new Promise((resolve, reject) => {
+            const query = `
+                SELECT * FROM vehiculos 
+                WHERE placa = ? 
+                ORDER BY fechaIngreso DESC
+            `;
+            
+            this.db.all(query, [placa], (err, rows) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(rows);
+                }
+            });
+        });
+    }
+
     // Obtener estadísticas
     getEstadisticas() {
         return new Promise((resolve, reject) => {

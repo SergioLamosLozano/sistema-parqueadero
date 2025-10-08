@@ -41,10 +41,20 @@ const RegistrarVehiculo: React.FC = () => {
    */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    // Para el campo placa, convertir a mayúsculas y validar formato
+    if (name === 'placa') {
+      const placaLimpia = value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      setFormData(prev => ({
+        ...prev,
+        [name]: placaLimpia
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
     
     // Limpiar error cuando el usuario empiece a escribir
     if (error) setError('');
@@ -69,10 +79,10 @@ const RegistrarVehiculo: React.FC = () => {
       return false;
     }
 
-    // Validar formato de placa (básico)
-    const placaRegex = /^[A-Za-z0-9]{3,8}$/;
-    if (!placaRegex.test(formData.placa.replace(/\s/g, ''))) {
-      setError('La placa debe tener entre 3 y 8 caracteres alfanuméricos');
+    // Validar formato de placa (3 letras + 3 números)
+    const formatoPlaca = /^[A-Z]{3}[0-9]{3}$/;
+    if (!formatoPlaca.test(formData.placa)) {
+      setError('La placa debe tener el formato: 3 letras seguidas de 3 números (ejemplo: ABC123)');
       return false;
     }
 
@@ -170,11 +180,11 @@ const RegistrarVehiculo: React.FC = () => {
               onChange={handleInputChange}
               className="form-input"
               placeholder="Ej: ABC123"
-              maxLength={8}
+              maxLength={6}
               required
             />
             <small className="form-help">
-              Ingresa la placa sin espacios ni caracteres especiales
+              Formato: 3 letras + 3 números (ejemplo: ABC123)
             </small>
           </div>
 

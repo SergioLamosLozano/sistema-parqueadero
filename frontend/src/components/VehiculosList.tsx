@@ -30,6 +30,7 @@ const VehiculosList: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [filtro, setFiltro] = useState<string>('todos'); // 'todos', 'dentro', 'fuera'
+  const [busqueda, setBusqueda] = useState<string>(''); // Estado para la búsqueda por placa
 
   // URL base de la API
   const API_URL = 'http://localhost:5000/api';
@@ -128,12 +129,20 @@ const VehiculosList: React.FC = () => {
   };
 
   /**
-   * Función para filtrar vehículos según el filtro seleccionado
+   * Función para filtrar vehículos según el filtro seleccionado y la búsqueda por placa
    */
   const vehiculosFiltrados = vehiculos.filter(vehiculo => {
-    if (filtro === 'dentro') return vehiculo.estado === 'Dentro';
-    if (filtro === 'fuera') return vehiculo.estado === 'Fuera';
-    return true; // 'todos'
+    // Filtro por estado
+    let cumpleFiltroEstado = true;
+    if (filtro === 'dentro') cumpleFiltroEstado = vehiculo.estado === 'Dentro';
+    if (filtro === 'fuera') cumpleFiltroEstado = vehiculo.estado === 'Fuera';
+    
+    // Filtro por búsqueda de placa (insensible a mayúsculas/minúsculas)
+    const cumpleBusqueda = busqueda === '' || 
+      vehiculo.placa.toLowerCase().includes(busqueda.toLowerCase()) ||
+      vehiculo.propietario.toLowerCase().includes(busqueda.toLowerCase());
+    
+    return cumpleFiltroEstado && cumpleBusqueda;
   });
 
   // Efecto para cargar los vehículos al montar el componente
@@ -156,7 +165,29 @@ const VehiculosList: React.FC = () => {
 
       {/* Filtros */}
       <div className="filters-section">
-        <h3>🔍 Filtrar por estado:</h3>
+        <h3>🔍 Filtrar y Buscar:</h3>
+        
+        {/* Barra de búsqueda */}
+        <div className="search-container">
+          <input
+            type="text"
+            placeholder="🔍 Buscar por placa o propietario..."
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            className="search-input"
+          />
+          {busqueda && (
+            <button 
+              onClick={() => setBusqueda('')}
+              className="clear-search-btn"
+              title="Limpiar búsqueda"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {/* Botones de filtro por estado */}
         <div className="filter-buttons">
           <button 
             className={`btn ${filtro === 'todos' ? 'btn-primary' : 'btn-outline'}`}
@@ -177,6 +208,13 @@ const VehiculosList: React.FC = () => {
             Fuera ({vehiculos.filter(v => v.estado === 'Fuera').length})
           </button>
         </div>
+
+        {/* Mostrar resultados de búsqueda */}
+        {busqueda && (
+          <div className="search-results-info">
+            <p>📊 Mostrando {vehiculosFiltrados.length} resultado(s) para "{busqueda}"</p>
+          </div>
+        )}
       </div>
 
       {/* Contenido principal */}
