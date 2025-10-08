@@ -309,7 +309,7 @@ const Estadisticas: React.FC = () => {
                   <div key={vehiculo.id} className="tiempo-item">
                     <div className="tiempo-rank">#{index + 1}</div>
                     <div className="tiempo-info">
-                      <h4 className="vehiculo-placa">{vehiculo.placa}</h4>
+                      <h4 className="vehiculo-placa">{vehiculo.placa.toUpperCase()}</h4>
                       <p className="vehiculo-detalles">
                         {vehiculo.tipo} - {vehiculo.propietario}
                       </p>

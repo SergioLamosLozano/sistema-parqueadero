@@ -244,7 +244,7 @@ const VehiculosList: React.FC = () => {
               {vehiculosFiltrados.map((vehiculo) => (
                 <div key={vehiculo.id} className={`vehiculo-card ${vehiculo.estado.toLowerCase()}`}>
                   <div className="card-header">
-                    <h3 className="vehiculo-placa">{vehiculo.placa}</h3>
+                    <h3 className="vehiculo-placa">{vehiculo.placa.toUpperCase()}</h3>
                     <span className={`estado-badge ${vehiculo.estado.toLowerCase()}`}>
                       {vehiculo.estado === 'Dentro' ? '🟢' : '🔴'} {vehiculo.estado}
                     </span>
