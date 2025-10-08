@@ -10,6 +10,9 @@ interface Estadisticas {
     carros: number;
     motos: number;
   };
+  capacidadMaxima: number;
+  espaciosDisponibles: number;
+  porcentajeOcupacion: number;
 }
 
 interface Vehiculo {
@@ -76,8 +79,9 @@ const Estadisticas: React.FC = () => {
    * Función para calcular el porcentaje de ocupación
    */
   const calcularPorcentajeOcupacion = (): number => {
-    if (!estadisticas || estadisticas.totalVehiculos === 0) return 0;
-    return Math.round((estadisticas.vehiculosDentro / estadisticas.totalVehiculos) * 100);
+    if (!estadisticas) return 0;
+    // Usamos el porcentaje calculado por el backend que considera la capacidad máxima
+    return estadisticas.porcentajeOcupacion || 0;
   };
 
   /**
@@ -190,6 +194,22 @@ const Estadisticas: React.FC = () => {
               <div className="stat-content">
                 <h3 className="stat-number">{calcularPorcentajeOcupacion()}%</h3>
                 <p className="stat-label">Ocupación Actual</p>
+              </div>
+            </div>
+
+            <div className="stat-card disponibles">
+              <div className="stat-icon">🅿️</div>
+              <div className="stat-content">
+                <h3 className="stat-number">{estadisticas.espaciosDisponibles}</h3>
+                <p className="stat-label">Espacios Disponibles</p>
+              </div>
+            </div>
+
+            <div className="stat-card capacidad">
+              <div className="stat-icon">🏢</div>
+              <div className="stat-content">
+                <h3 className="stat-number">{estadisticas.capacidadMaxima}</h3>
+                <p className="stat-label">Capacidad Máxima</p>
               </div>
             </div>
           </div>
