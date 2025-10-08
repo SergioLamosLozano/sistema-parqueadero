@@ -7,6 +7,9 @@ const { database, initializeDatabase } = require('./database'); // Importamos la
 const app = express();
 const PORT = 5000; // Puerto donde correrá nuestro servidor
 
+// Configuración del parqueadero
+const CAPACIDAD_MAXIMA = 50; // Capacidad máxima del parqueadero (puedes cambiar este valor)
+
 // Middleware - funciones que se ejecutan antes de las rutas
 app.use(cors()); // Permite peticiones desde cualquier origen (frontend)
 app.use(express.json()); // Permite recibir datos en formato JSON
@@ -87,14 +90,25 @@ app.post('/api/vehiculos', async (req, res) => {
                 message: 'Todos los campos son requeridos: placa, tipo, propietario'
             });
         }
+
+        // Obtenemos todos los vehículos para validaciones
+        const vehiculos = await database.getAllVehiculos();
         
         // Verificamos si ya existe un vehículo con esa placa que esté dentro
-        const vehiculos = await database.getAllVehiculos();
         const vehiculoExistente = vehiculos.find(v => v.placa === placa && v.estado === 'Dentro');
         if (vehiculoExistente) {
             return res.status(400).json({
                 success: false,
                 message: 'Ya existe un vehículo con esa placa dentro del parqueadero'
+            });
+        }
+
+        // Verificamos la capacidad máxima del parqueadero
+        const vehiculosDentro = vehiculos.filter(v => v.estado === 'Dentro');
+        if (vehiculosDentro.length >= CAPACIDAD_MAXIMA) {
+            return res.status(400).json({
+                success: false,
+                message: `El parqueadero ha alcanzado su capacidad máxima de ${CAPACIDAD_MAXIMA} vehículos. Espacios ocupados: ${vehiculosDentro.length}/${CAPACIDAD_MAXIMA}`
             });
         }
         
@@ -272,6 +286,11 @@ app.get('/api/estadisticas', async (req, res) => {
         // Aseguramos que siempre haya valores para carros y motos
         estadisticas.tiposVehiculos.carros = estadisticas.tiposVehiculos.carros || 0;
         estadisticas.tiposVehiculos.motos = estadisticas.tiposVehiculos.motos || 0;
+        
+        // Agregamos información sobre la capacidad del parqueadero
+        estadisticas.capacidadMaxima = CAPACIDAD_MAXIMA;
+        estadisticas.espaciosDisponibles = CAPACIDAD_MAXIMA - estadisticas.vehiculosDentro;
+        estadisticas.porcentajeOcupacion = Math.round((estadisticas.vehiculosDentro / CAPACIDAD_MAXIMA) * 100);
         
         res.status(200).json({
             success: true,
